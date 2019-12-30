@@ -19,13 +19,44 @@ Citizen.CreateThread(function()
 	end
 	
 end)
+local vehicle
+function disableEngine()
+	Citizen.CreateThread(function()
+		while hotwiring do
+			SetVehicleEngineOn(vehicle, false, true, false)
+			if not hotwiring then
+				break
+			end
+			Citizen.Wait(0)
+		end
+	end)
+end
+
+
+--[[ Main Thread --]]
+Citizen.CreateThread(function()
+	local player_entity = PlayerPedId()
+	while true do
+		Citizen.Wait(0)
+		if GetSeatPedIsTryingToEnter(player_entity) == -1 then
+	        Citizen.Wait(10)
+			vehicle = GetVehiclePedIsTryingToEnter(player_entity)
+			if IsVehicleNeedsToBeHotwired(vehicle) then
+				disableEngine()
+				hotwiring = true
+				Citizen.Wait(7000)
+				ClearPedTasks(player_entity)
+			end
+		end
+	end
+end)
+
 
 RegisterNetEvent("chip_hotwire:hotwire")
 AddEventHandler("chip_hotwire:hotwire", function()
-	local playerVeh = GetVehiclePedIsUsing(PlayerPedId(-1), false)
 
-	local veh = GetVehiclePedIsIn(playerPed)
-    local plate = GetVehicleNumberPlateText(veh)
+	
+	local playerVeh = GetVehiclePedIsUsing(PlayerPedId(-1), false)
 
 	if IsPedInAnyVehicle(PlayerPedId(-1), false) then
 		exports['mythic_notify']:SendAlert('inform', 'Du brukte et dirkesett')
@@ -67,7 +98,7 @@ AddEventHandler("chip_hotwire:hotwireFailed", function()
 	local playerVeh = GetVehiclePedIsUsing(PlayerPedId(-1), false)
 
 	if IsPedInAnyVehicle(PlayerPedId(-1), false) then 
-		SetVehicleEngineOn(veh, false, true, true)
+		SetVehicleEngineOn(playerVeh, false, true, true)
 		Citizen.Wait(200)
 	end
 end)
