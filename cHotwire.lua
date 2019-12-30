@@ -1,12 +1,12 @@
 ESX = nil
-
-
 Citizen.CreateThread(function()
 	while ESX == nil do
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 		Citizen.Wait(0)
 	end
 end)
+
+local hotwiring = false
 
 Citizen.CreateThread(function()
 	while true do
@@ -80,14 +80,13 @@ AddEventHandler("chip_hotwire:hotwire", function()
 		}, function(cancelled)
 			if not cancelled then
 				exports['mythic_notify']:SendAlert('success', 'Du er ganske flink du')
+                hotwiring = false
+                SetVehicleEngineOn(playerVeh, true, false, false)
 			else
 				TriggerEvent("chip_hotwire:hotwireFailed")
 				exports['mythic_notify']:SendAlert('error', 'Du er en ræva tyv')
 			end
-		end)
-		Citizen.Wait(11000)
-		SetVehicleEngineOn(playerVeh, true, false, false)
-		
+		end)	
 	else
 		exports['mythic_notify']:SendAlert('error', 'Du er ikke i en bil')
 	end
