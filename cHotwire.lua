@@ -8,6 +8,18 @@ Citizen.CreateThread(function()
 	end
 end)
 
+Citizen.CreateThread(function()
+	while true do
+		
+		if DoesEntityExist(GetVehiclePedIsTryingToEnter(PlayerPedId())) then  --is player entering a vehicle
+			SetVehicleNeedsToBeHotwired(GetVehiclePedIsTryingToEnter(PlayerPedId()), false) -- disable native hotwire
+		end
+		
+		Citizen.Wait(300) -- requires minimum of 1. larger number saves some performance if necessary
+	end
+	
+end)
+
 RegisterNetEvent("chip_hotwire:hotwire")
 AddEventHandler("chip_hotwire:hotwire", function()
 	local playerVeh = GetVehiclePedIsUsing(PlayerPedId(-1), false)
