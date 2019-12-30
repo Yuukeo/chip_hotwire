@@ -1,21 +1,11 @@
 ESX = nil
 
-local trackedVehicles = {}
 
 Citizen.CreateThread(function()
 	while ESX == nil do
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 		Citizen.Wait(0)
 	end
-end)
-
-RegisterNetEvent('chip_hotwire:forceTurnOver')
-AddEventHandler('chip_hotwire:forceTurnOver', function(vehicle)
-	local playerPed = GetPlayerPed(-1)
-	local vehicle = GetVehiclePedIsIn(playerPed)
-    local plate = GetVehicleNumberPlateText(vehicle)
-    TrackVehicle(plate, vehicle)
-    trackedVehicles[plate].canTurnOver = true
 end)
 
 RegisterNetEvent("chip_hotwire:hotwire")
@@ -26,11 +16,11 @@ AddEventHandler("chip_hotwire:hotwire", function()
     local plate = GetVehicleNumberPlateText(veh)
 
 	if IsPedInAnyVehicle(PlayerPedId(-1), false) then
-		exports['mythic_notify']:SendAlert('inform', 'Du brukte et Hotwire-Kit')
+		exports['mythic_notify']:SendAlert('inform', 'Du brukte et dirkesett')
 		exports['mythic_progbar']:Progress({
 			name = "firstaid_action",
 			duration = 10000,
-			label = "Bruker hotwire-kit...",
+			label = "Tjuvstarter bilen...",
 			useWhileDead = false,
 			canCancel = true,
 			controlDisables = {
@@ -62,35 +52,10 @@ end)
 
 RegisterNetEvent("chip_hotwire:hotwireFailed")
 AddEventHandler("chip_hotwire:hotwireFailed", function()
-	local playerVeh = GetVehiclePedIsUsing(player, false)
+	local playerVeh = GetVehiclePedIsUsing(PlayerPedId(-1), false)
 
 	if IsPedInAnyVehicle(PlayerPedId(-1), false) then 
 		SetVehicleEngineOn(veh, false, true, true)
 		Citizen.Wait(200)
 	end
-end)
-
-
-function TrackVehicle(plate, vehicle)
-    if trackedVehicles[plate] == nil then
-        trackedVehicles[plate] = {}
-        trackedVehicles[plate].vehicle = vehicle
-        trackedVehicles[plate].canTurnOver = false
-    end
-end
-
-
---Disable All Cars Not tracked or Turned over
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(0)
-        for k, v in pairs(trackedVehicles) do
-            if not v.state == 0 then
-                SetVehicleEngineOn(v.vehicle, false, false)
-            elseif v.state == 1 then
-                SetVehicleEngineOn(v.vehicle, true, false)
-                v.state = -1
-            end
-        end
-    end
 end)
